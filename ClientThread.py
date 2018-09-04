@@ -1,6 +1,7 @@
 import socket, os
 from threading import Thread
 from socketserver import ThreadingMixIn
+import share as share
 
 # Multithreaded Python server : TCP Server Socket Thread Pool
 class ClientThread(Thread):
@@ -16,11 +17,21 @@ class ClientThread(Thread):
 
         while True :
             data = self.conn.recv(30) #receive message from client
-            message = data.decode() #decode
-            position = message.split(",")
+            message = data.decode()
+            print(message) #decode
+            try:
+                positionx, positiony = message.split(",")
+                print("success")
+            except ValueError:
+                print("Failure / Wrong format ? (x,y)")
             
-            print("position x :" + position[0])
-            print("position y :" + position[1])
+            print("position x : " + positionx)
+            print("position y : " + positiony)
+            if(share.l_map[int(positionx)][int(positiony)] == 0):
+                message = "Bravo"
+                share.l_map[int(positionx)][int(positiony)] = 1
+            else:
+                message = "Marche pas"
             self.conn.send(message.encode())  # send message to the client
 
 

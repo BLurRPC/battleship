@@ -1,5 +1,6 @@
 from ClientThread import ClientThread
 import socket
+import share as share
 
 # Multithreaded Python server : TCP Server Socket Program Stub
 TCP_IP = ''
@@ -9,6 +10,8 @@ tcpServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 tcpServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 tcpServer.bind((TCP_IP, TCP_PORT))
 threads = []
+
+share.initTable()
 
 while True:
     tcpServer.listen(5)
