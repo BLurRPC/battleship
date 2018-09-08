@@ -1,35 +1,38 @@
 #!/usr/bin/python
 # -*- coding: latin-1 -*-
 import os, sys
+import share
 from getpass import getpass
 
 class Personne(object):
-	
-	"""Classe définissant une personne caractérisée par :
+
+    """Classe définissant une personne caractérisée par :
 
     - son  username
 
     - son  mdp"""
 
-	Admin_username = "Admin"
-	Admin_password = "Admin"
-	def __init__(self, username, password):
-	    super(Personne, self).__init__()
-	    self.username = username
-	    self.password = password
+    Admin_username = "Admin"
+    Admin_password = "Admin"
+    isAdmin = False
 
-verrouille = True
-while verrouille:
-	#entre_u = getpass("Tapez le username : ") # Admin
-    entre_p = getpass("Tapez le mot de passe : ") # Admin
-    # On doit entrer le mot de passe pour voir si c'est bien l'admin
-    print("La première personne à se connecter, doit être l'admin")
-    a=True #variable boolean pour la confirmation de la connection de l'admin
-    while a:
-	    if entre_p == Personne.Admin_password: #& entre_u == Personne.Admin_username:	
-	    	verrouille = False
-	    	print ("Bienvenue !" + "Mr l'" + Personne.Admin_username)
-	    	a=False	
-	    else:
-	    	print ("Le mot de passe est incorrect")
-	    	break
+    def __init__(self, username, password):
+        super(Personne, self).__init__()
+        self.username = username
+        self.password = password
+
+def waitingForAdmin(conn):
+    """ Asking for id/password, and if admin then send adminConnected to all
+        Return an object personne"""
+
+    identifiant = conn.recv(30)
+    motDePasse = conn.recv(30)
+    currentStatus = "waitingForAdmin"
+    personne = Personne(identifiant, motDePasse)
+    if(identifiant.decode()==personne.Admin_username and motDePasse.decode()==personne.Admin_password and not share.isAdminConnected):
+        personne.isAdmin = True
+    if((identifiant.decode()==personne.Admin_username and motDePasse.decode()==personne.Admin_password) or share.isAdminConnected):
+        share.isAdminConnected=True
+        currentStatus = "adminConnected"
+    conn.send(currentStatus.encode())
+    return personne

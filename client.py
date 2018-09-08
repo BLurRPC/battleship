@@ -7,12 +7,23 @@ port = 2004 #server's port
 tcpClientA = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 tcpClientA.connect((host, port))
 
-l_map = [] #Cette liste contiendra ma map en 2D
+l_map = [] #Cette liste contiendra la map en 2D
 for i in range(10):
     l_map.append([0] * 10) #Ajoute 10 colonnes de 10 entiers(int) ayant pour valeurs 0
 
-showTable(l_map)
+###Waiting for admin part###
 
+isAdminConnected = tcpClientA.recv(30)
+while (isAdminConnected.decode() == "waitingForAdmin"):
+    identifiant = input("Identifiant :\n")
+    tcpClientA.send(identifiant.encode())
+    motDePasse = input("Mot de passe :\n")
+    tcpClientA.send(motDePasse.encode())
+    isAdminConnected = tcpClientA.recv(30)
+
+###Gaming part###
+
+showTable(l_map)
 while True :
     message = input("tcpClientA: Enter message\n")
     while True :

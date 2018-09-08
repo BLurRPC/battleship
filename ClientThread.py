@@ -1,5 +1,6 @@
 import socket, os
 from threading import Thread
+from Authentification import *
 from socketserver import ThreadingMixIn
 import share as share
 
@@ -15,7 +16,21 @@ class ClientThread(Thread):
 
     def run(self):
 
+        ###Waiting for admin part###
+
+        personne = Personne("","") #By default
+        if(share.isAdminConnected):
+            currentStatus = "adminConnected"
+        else:
+            currentStatus = "waitingForAdmin"
+        self.conn.send(currentStatus.encode())
+        while(not share.isAdminConnected): #While admin not connected
+            personne = waitingForAdmin(self.conn) #Ask for user/password
+
+        ###Gaming part###
+
         while True :
+            print("personne : "+ str(personne.isAdmin))
             data = self.conn.recv(30) #receive message from client
             message = data.decode()
             print(message) #decode
@@ -24,7 +39,7 @@ class ClientThread(Thread):
                 print("success")
             except ValueError:
                 print("Failure / Wrong format ? (x,y)")
-            
+
             print("position x : " + positionx)
             print("position y : " + positiony)
             if(share.l_map[int(positionx)][int(positiony)] == 0):
@@ -33,5 +48,3 @@ class ClientThread(Thread):
             else:
                 message = "Marche pas"
             self.conn.send(message.encode())  # send message to the client
-
-
