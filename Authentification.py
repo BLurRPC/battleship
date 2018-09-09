@@ -1,8 +1,6 @@
 #!/usr/bin/python
 # -*- coding: latin-1 -*-
-import os, sys
 import share
-from getpass import getpass
 
 class Personne(object):
 
@@ -14,25 +12,25 @@ class Personne(object):
 
     Admin_username = "Admin"
     Admin_password = "Admin"
-    isAdmin = False
 
     def __init__(self, username, password):
         super(Personne, self).__init__()
         self.username = username
         self.password = password
+        self.isAdmin = False
 
 def waitingForAdmin(conn):
     """ Asking for id/password, and if admin then send adminConnected to all
         Return an object personne"""
 
-    identifiant = conn.recv(30)
-    motDePasse = conn.recv(30)
+    user = conn.recv(30)
+    password = conn.recv(30)
     currentStatus = "waitingForAdmin"
-    personne = Personne(identifiant, motDePasse)
-    if(identifiant.decode()==personne.Admin_username and motDePasse.decode()==personne.Admin_password and not share.isAdminConnected):
-        personne.isAdmin = True
-    if((identifiant.decode()==personne.Admin_username and motDePasse.decode()==personne.Admin_password) or share.isAdminConnected):
+    person = Personne(user.decode(), password.decode())
+    if(user.decode()==person.Admin_username and password.decode()==person.Admin_password and not share.isAdminConnected):
+        person.isAdmin = True
+    if((user.decode()==person.Admin_username and password.decode()==person.Admin_password) or share.isAdminConnected):
         share.isAdminConnected=True
         currentStatus = "adminConnected"
     conn.send(currentStatus.encode())
-    return personne
+    return person

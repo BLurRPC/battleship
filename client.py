@@ -1,5 +1,6 @@
 import socket
 from graphic import *
+import getpass
 
 host = '127.0.0.1' #server's IP
 port = 2004 #server's port
@@ -15,26 +16,31 @@ for i in range(10):
 
 isAdminConnected = tcpClientA.recv(30)
 while (isAdminConnected.decode() == "waitingForAdmin"):
-    identifiant = input("Identifiant :\n")
-    tcpClientA.send(identifiant.encode())
-    motDePasse = input("Mot de passe :\n")
-    tcpClientA.send(motDePasse.encode())
+    user = input("Please enter your username :")
+    tcpClientA.send(user.encode())
+
+    password = getpass.getpass("Please enter a password "+user+" :\n")
+    tcpClientA.send(password.encode())
     isAdminConnected = tcpClientA.recv(30)
 
 ###Gaming part###
 
 showTable(l_map)
 while True :
-    message = input("tcpClientA: Enter message\n")
+    coordinates = input(user + " : Enter coordinates (x,y)\n")
     while True :
         try:
-            positionx, positiony = message.split(",")
-            print("success")
-            break
+            positionx, positiony = coordinates.split(",")
+            if(0 <= int(positionx) <= 9 and 0 <= int(positiony) <= 9):
+                print("success")
+                break
+            else:
+                print("Failure : Not in range [0-9]")
+                coordinates = input(user + " : Enter coordinates (x,y)\n")
         except ValueError:
-            print("Failure / Wrong format ? (x,y)")
-            message = input("tcpClientA: Enter message\n")
+            print("Failure : Wrong format (x,y)")
+            coordinates = input(user + " : Enter coordinates (x,y)\n")
 
-    tcpClientA.send(message.encode())
+    tcpClientA.send(coordinates.encode())
     data=tcpClientA.recv(1000)
-    print("Received :" + data.decode())
+    print("Received from server : " + data.decode())
