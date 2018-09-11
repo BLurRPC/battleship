@@ -27,8 +27,6 @@ def waitingForAdmin(conn):
     password = conn.recv(30)
     currentStatus = "waitingForAdmin"
     person = Personne(user.decode(), password.decode())
-    if(user.decode()==person.Admin_username and password.decode()==person.Admin_password and not share.isAdminConnected):
-        person.isAdmin = True
     if((user.decode()==person.Admin_username and password.decode()==person.Admin_password) or share.isAdminConnected):
         share.isAdminConnected=True
         currentStatus = "adminConnected"

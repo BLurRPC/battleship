@@ -1,9 +1,9 @@
 global l_map
-l_map = []
 global players
-players = []
 global isAdminConnected
 global isGameReady
+l_map = []
+players = []
 isAdminConnected=False
 isGameReady=False
 
