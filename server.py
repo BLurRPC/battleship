@@ -1,8 +1,10 @@
 from ClientThread import ClientThread
+from GameThread import GameThread
 from Authentification import *
 from queue import Queue
 import socket, select
 import share as share
+import graphic
 
 # Multithreaded Python server : TCP Server Socket Program Stub
 TCP_IP = ''
@@ -17,11 +19,44 @@ share.initTable()
 rlist = [tcpServer]
 work_queue = Queue()
 conns = []
+conns2 = []
+share.l_map = [["##" for x in range(10)] for y in range(10)]  # Cette liste contiendra la map en 2D
+
+def isPositionValid(conn):
+    data = conn.recv(30)  # receive message from client
+    message = data.decode()
+    print(message)  # decode
+    try:
+        positionx, positiony = message.split(",")
+    except ValueError:
+        print("Failure / Wrong format ? (x,y)")
+
+    print("position x : " + positionx)
+    print("position y : " + positiony)
+    return (hitAnswer(int(positionx), int(positiony), conn))
+
+def hitAnswer(x , y, conn):
+    if share.l_map[y][x]== "C" or share.l_map[y][x]== "C" == "T":
+        print("Already hit")
+        conn.send("Already hit".encode())
+        return False
+    elif share.l_map[y][x] == "##":
+        print("Coule")
+        conn.send("C".encode())
+    else:
+        print("Touche")
+        conn.send("T".encode())
+    return True
 
 def accept_client():
     (conn, (ip, port)) = tcpServer.accept()
-    conns.append(conn)
-    ClientThread(ip, port, conn, work_queue).start()
+
+    if(conn in conns):
+        conns2.append(conn)
+        #GameThread(ip, port, conn).start()
+    else:
+        conns.append(conn)
+        ClientThread(ip, port, conn, work_queue).start()
 
 accept_client()
 
@@ -31,31 +66,10 @@ while not work_queue.empty():
         print("Multithreaded Python server : Waiting for connections from TCP clients...")
         accept_client()
 
-for conn in conns:
-    message = "youAreNotAdmin"
-    for conn2,player in share.players:
-        print(str(conn)+"\n"+str(conn2)+"\n"+str(player))
-        if(conn==conn2 and player.isAdmin):
-            message="youAreAdmin"
-    conn.send(message.encode())
-
+### Game part###
 while True:
+    graphic.showTable(share.l_map)
     for conn in conns:
         conn.send("It's your turn".encode())
-        data = conn.recv(30)  # receive message from client
-        message = data.decode()
-        print(message)  # decode
-        try:
-            positionx, positiony = message.split(",")
-            print("Success")
-        except ValueError:
-            print("Failure / Wrong format ? (x,y)")
-
-        print("position x : " + positionx)
-        print("position y : " + positiony)
-        if (share.l_map[int(positionx)][int(positiony)] == 0):
-            message = "Good job"
-            share.l_map[int(positionx)][int(positiony)] = 1
-        else:
-            message = "Already hit"
-        conn.send(message.encode())  # send message to the client
+        while(not isPositionValid(conn)):
+            print("Wrong position")

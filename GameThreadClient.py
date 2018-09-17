@@ -6,31 +6,14 @@ import share as share
 # Multithreaded Python server : TCP Server Socket Thread Pool
 class GameThreadClient(Thread):
 
-    def __init__(self,ip,port,conn):
+    def __init__(self, conn):
         Thread.__init__(self)
-        self.ip = ip
-        self.port = port
         self.conn = conn
-        #self.person = person
-        print("[+]Still on " + ip + ":" + str(port))
+        print("[+]Second thread started for : " + str(conn))
 
     def run(self):
 
-        #print(self.person.username + " : " + str(person.isAdmin))
-        data = self.conn.recv(30) #receive message from client
-        message = data.decode()
-        print(message) #decode
-        try:
-            positionx, positiony = message.split(",")
-            print("Success")
-        except ValueError:
-            print("Failure / Wrong format ? (x,y)")
-
-        print("position x : " + positionx)
-        print("position y : " + positiony)
-        if(share.l_map[int(positionx)][int(positiony)] == 0):
-            message = "Good job"
-            share.l_map[int(positionx)][int(positiony)] = 1
-        else:
-            message = "Already hit"
-        self.conn.send(message.encode())  # send message to the client
+        while True:
+            data = self.conn.recv(30) #receive message from client
+            message = data.decode()
+            print(message) #decode

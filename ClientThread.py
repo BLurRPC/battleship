@@ -1,7 +1,7 @@
 from threading import Thread
 from Authentification import *
 from GameThread import GameThread
-from socketserver import ThreadingMixIn
+import SetMapServer
 import share as share
 
 # Multithreaded Python server : TCP Server Socket Thread Pool
@@ -27,14 +27,27 @@ class ClientThread(Thread):
             password = self.conn.recv(30)
             person = Personne(user.decode(), password.decode())
             if ((user.decode() == person.Admin_username and password.decode() == person.Admin_password)):
-                # ADMIN configure la game ici cote serveur
                 share.isAdminConnected = True
                 person.isAdmin = True
-                currentStatus = "adminConnected"
+
             if(share.isAdminConnected):
-                share.isAdminConnected = True
                 currentStatus = "adminConnected"
                 share.players.append([self.conn, person])
             self.conn.send(currentStatus.encode())
+
+        adminInfo = "youAreNotAdmin"
+        if (person.isAdmin):
+            adminInfo = "youAreAdmin"
+        self.conn.send(adminInfo.encode())
+        while not share.isGameReady:
+            if (person.isAdmin):
+                for i in range(5):
+                    data = self.conn.recv(30)
+                    message = data.decode()
+                    shipNum, x, y, orientation = message.split(",")
+                    print(shipNum + " : " + " " + orientation + " " + x + " " + y)
+                    shipName, size = SetMapServer.convertShip(int(shipNum))
+                    SetMapServer.updateShipTable(shipName,size,orientation,int(x), int(y))
+                share.isGameReady = True
         if self.queue:
             self.queue.get_nowait()
