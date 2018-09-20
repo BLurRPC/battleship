@@ -45,8 +45,9 @@ class ClientThreadClient(Thread):
             self.conn.send(password.encode())
         print("Waiting for others to connect...\n")
         ###Admin part before begining###
-
+        self.conn.send("ok".encode())
         amIAdmin = self.conn.recv(30)
+        print(amIAdmin)
         if(amIAdmin.decode() == "youAreAdmin"):
             ###Admin set the game here cote client
             print("You are Admin.\nYou can configure the game here")
@@ -89,7 +90,8 @@ class ClientThreadClient(Thread):
 
         while True:
             print("Waiting for others ...\n")
-            print(self.conn.recv(30).decode())
+            self.conn.recv(30)
+            self.conn.send("ok".encode())
             graphic.showTable(SetMap.l_map)
             while(not self.isPositionValid(user)):
                 print("")

@@ -24,7 +24,9 @@ class ClientThread(Thread):
         self.conn.send(currentStatus.encode())
         while (not share.isAdminConnected):  # While admin not connected
             user = self.conn.recv(30)
+            print(user.decode())
             password = self.conn.recv(30)
+            print(password.decode())
             person = Personne(user.decode(), password.decode())
             if ((user.decode() == person.Admin_username and password.decode() == person.Admin_password)):
                 share.isAdminConnected = True
@@ -34,12 +36,15 @@ class ClientThread(Thread):
                 currentStatus = "adminConnected"
                 share.players.append([self.conn, person])
             self.conn.send(currentStatus.encode())
-
+            self.conn.recv(10)
         adminInfo = "youAreNotAdmin"
+        
         if (person.isAdmin):
             adminInfo = "youAreAdmin"
         self.conn.send(adminInfo.encode())
+
         while not share.isGameReady:
+            print("Arrive la")
             if (person.isAdmin):
                 for i in range(5):
                     data = self.conn.recv(30)

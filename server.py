@@ -50,13 +50,8 @@ def hitAnswer(x , y, conn):
 
 def accept_client():
     (conn, (ip, port)) = tcpServer.accept()
-
-    if(conn in conns):
-        conns2.append(conn)
-        #GameThread(ip, port, conn).start()
-    else:
-        conns.append(conn)
-        ClientThread(ip, port, conn, work_queue).start()
+    conns.append(conn)
+    ClientThread(ip, port, conn, work_queue).start()
 
 accept_client()
 
@@ -70,6 +65,7 @@ while not work_queue.empty():
 while True:
     graphic.showTable(share.l_map)
     for conn in conns:
-        conn.send("It's your turn".encode())
+        conn.send("Your turn".encode())
+        conn.recv(10)
         while(not isPositionValid(conn)):
             print("Wrong position")
