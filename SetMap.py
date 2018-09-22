@@ -49,8 +49,6 @@ def updateShipTable(myShip, x,y): #choose orientation for your ship
     #place ship based on orientation
     global l_map
     global orientation_of_ship
-    print("test " + myShip[0])
-    print(orientation_of_ship)
     for i, ship in enumerate(myShip):
         if orientation_of_ship == "E":
             l_map[y][x+i] = myShip[i]

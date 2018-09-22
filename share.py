@@ -2,10 +2,6 @@ global l_map
 global players
 global isAdminConnected
 global isGameReady
-l_map = []
-players = []
-isAdminConnected=False
-isGameReady=False
 
 def initTable():
     for i in range(10):

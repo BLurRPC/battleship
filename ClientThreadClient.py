@@ -41,14 +41,18 @@ class ClientThreadClient(Thread):
         while (self.conn.recv(30).decode() == "waitingForAdmin"):
             user = input("Please enter your username :")
             self.conn.send(user.encode())
+            self.conn.recv(10)
             password = getpass.getpass("Please enter a password " + user + " :\n")
             self.conn.send(password.encode())
+            self.conn.send("ok".encode())
         print("Waiting for others to connect...\n")
         ###Admin part before begining###
-        self.conn.send("ok".encode())
+
         amIAdmin = self.conn.recv(30)
         print(amIAdmin)
+        isAdmin = False
         if(amIAdmin.decode() == "youAreAdmin"):
+            isAdmin = True
             ###Admin set the game here cote client
             print("You are Admin.\nYou can configure the game here")
 
@@ -76,24 +80,27 @@ class ClientThreadClient(Thread):
                                 message = str(shipNum) + "," + str(x) + "," + str(y) + "," + SetMap.orientation_of_ship
                                 self.conn.send(message.encode())
                                 count+=1
-                                print("Table updated")
                             else:
-                                print("Collision")
+                                print("There is a collision here. Please try another position")
                         else:
                             print("Ship already placed")
                 graphic.showTable(SetMap.l_map)
 
         else:
-            print("You are not Admin")
+            print("You are not Admin. Please wait for him ...")
 
         ###Gaming part###
-
-        while True:
-            print("Waiting for others ...\n")
-            self.conn.recv(30)
-            self.conn.send("ok".encode())
-            graphic.showTable(SetMap.l_map)
-            while(not self.isPositionValid(user)):
-                print("")
-
-
+        gameOver = 0
+        while gameOver<=17: #While not at least 17 hits
+            if(not isAdmin): #Only players can play
+                print("Waiting for others to play ...\n")
+                temp = self.conn.recv(30).decode()  #Number of points
+                nbPoints = int(temp)
+                self.conn.send("ok".encode())
+                graphic.showTable(SetMap.l_map)
+                print(user + " : " + str(nbPoints) + " points !")
+                while(not self.isPositionValid(user)):
+                    print("")
+                self.conn.send("ok".encode())
+                gameOver = int(self.conn.recv(30).decode())
+                print(str(gameOver))
