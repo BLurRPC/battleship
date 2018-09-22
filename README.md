@@ -9,6 +9,7 @@
 - ~~Afficher côté client le nom, prénom et son nombre de points : Easy~~ ***Thomas***
 - Faire un classement en temps réel des joueurs : Easy
 - ~~Faire 2 binaires executables, un client et un serveur : Very Easy~~ ***Thomas***
+- Gerer les deconnexions intempestives
 
 ## ATTENTION à ne pas confondre le tableau côté serveur et celui côté client. 
 Le tableau côté serveur doit être rempli de "##" à la fin de la partie (plus aucun bateau).
