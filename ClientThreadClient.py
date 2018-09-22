@@ -49,7 +49,6 @@ class ClientThreadClient(Thread):
         ###Admin part before begining###
 
         amIAdmin = self.conn.recv(30)
-        print(amIAdmin)
         isAdmin = False
         if(amIAdmin.decode() == "youAreAdmin"):
             isAdmin = True

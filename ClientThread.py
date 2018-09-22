@@ -38,8 +38,8 @@ class ClientThread(Thread):
             self.conn.send(currentStatus.encode())
             self.conn.recv(10)
 
-            if(not person.isAdmin): #If not admin, add to list of players
-                share.players.append([self.conn, person])
+        if(not person.isAdmin): #If not admin, add to list of players
+            share.players.append([self.conn, person])
         adminInfo = "youAreNotAdmin"
         
         if (person.isAdmin):

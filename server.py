@@ -83,7 +83,6 @@ while not work_queue.empty():
         accept_client()
 
 ### Game part###
-print(share.players)
 while Personne.endOfTheGame != 17:
     graphic.showTable(share.l_map)
     for conn, player in share.players:
