@@ -1,9 +1,10 @@
 # Battleship Python3
 
 ## To do classe par ordre de priorite
+- Gere la fin de partie proprement.
 - ~~Finir la fonction touche/coule et ne pas oublier d'incrémenter le compteur du joueur (attention aux bords du tableau) : Medium~~ ***Thomas***
 - ~~Arreter la partie quand tous les bateaux sont coulés.~~ ***Thomas***
-- Bien afficher "T", "C" côté client en suivant les consignes : Easy
+- ~~Bien afficher "T", "C" côté client en suivant les consignes : Easy~~ ***Thomas***
 - ~~Blacklister l'admin de la liste des connections côté serveur et rajouter une condition côté client pour que seul l'admin ne puisse pas jouer : Medium~~ ***Thomas***
 - Mettre à jour en "temps réel" chaque client : Difficult
 - ~~Afficher côté client le nom, prénom et son nombre de points : Easy~~ ***Thomas***
