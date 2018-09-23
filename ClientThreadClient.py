@@ -28,21 +28,27 @@ class ClientThreadClient(Thread):
         self.conn.send(coordinates.encode())
         data = self.conn.recv(30)
         print("Received from server : " + data.decode())
-        if (data.decode() != "Already hit"):
+        tmpX, tmpY, signal = data.decode().split(",")
+        if (signal != "Already hit"):
+            print(signal + " en : " + tmpX + "," + tmpY)
+            SetMap.l_map[int(tmpY)][int(tmpX)] = signal
             return True
         else:
             print("Please try another position")
             return False
 
     def run(self):
-        user=""
-        SetMap.l_map = [["##" for x in range(10)] for y in range(10)]  # Cette liste contiendra la map en 2D
+        SetMap.l_map = [["#" for x in range(10)] for y in range(10)]  # Cette liste contiendra la map en 2D
 
         while (self.conn.recv(30).decode() == "waitingForAdmin"):
-            user = input("Please enter your username :")
+            user = ""
+            password = ""
+            while user == "":
+                user = input("Please enter your username :")
             self.conn.send(user.encode())
             self.conn.recv(10)
-            password = getpass.getpass("Please enter a password " + user + " :\n")
+            while password == "":
+                password = getpass.getpass("Please enter a password " + user + " :\n")
             self.conn.send(password.encode())
             self.conn.send("ok".encode())
         print("Waiting for others to connect...\n")
@@ -55,12 +61,12 @@ class ClientThreadClient(Thread):
             ###Admin set the game here cote client
             print("You are Admin.\nYou can configure the game here")
 
-            graphic.showTable(SetMap.l_map)
-            carrier = ["ca", "ca", "ca", "ca", "ca"]
-            battleship = ["ba", "ba", "ba", "ba"]
-            cruiser = ["cr", "cr", "cr"]
-            submarine = ["su", "su", "su"]
-            destroyer = ["de", "de"]
+            graphic.showTableClient(SetMap.l_map)
+            carrier = ["1", "1", "1", "1", "1"]
+            battleship = ["2", "2", "2", "2"]
+            cruiser = ["3", "3", "3"]
+            submarine = ["4", "4", "4"]
+            destroyer = ["5", "5"]
             ships = [(carrier, 1), (battleship, 2), (cruiser, 3), (submarine, 4), (destroyer, 5)]
             shipsPlaced = []
             count = 0
@@ -83,7 +89,7 @@ class ClientThreadClient(Thread):
                                 print("There is a collision here. Please try another position")
                         else:
                             print("Ship already placed")
-                graphic.showTable(SetMap.l_map)
+                graphic.showTableClient(SetMap.l_map)
 
         else:
             print("You are not Admin. Please wait for him ...")
@@ -93,13 +99,25 @@ class ClientThreadClient(Thread):
         while gameOver<=17: #While not at least 17 hits
             if(not isAdmin): #Only players can play
                 print("Waiting for others to play ...\n")
-                temp = self.conn.recv(30).decode()  #Number of points
-                nbPoints = int(temp)
+                update = self.conn.recv(30)
+                tmpX, tmpY, signal = update.decode().split(",")
                 self.conn.send("ok".encode())
-                graphic.showTable(SetMap.l_map)
-                print(user + " : " + str(nbPoints) + " points !")
+                while(tmpX!="Your" and tmpY!="Turn" and signal!="Play"):
+                    SetMap.l_map[int(tmpY)][int(tmpX)] = signal
+                    graphic.showTableClient(SetMap.l_map)
+                    print("Waiting for others to play ...\n")
+                    update = self.conn.recv(30)
+                    tmpX, tmpY, signal = update.decode().split(",")
+                    self.conn.send("ok".encode())
+                graphic.showTableClient(SetMap.l_map)
                 while(not self.isPositionValid(user)):
                     print("")
                 self.conn.send("ok".encode())
+                temp = self.conn.recv(30).decode()  # Number of points
+                nbPoints = int(temp)
+                self.conn.send("ok".encode())
                 gameOver = int(self.conn.recv(30).decode())
-                print(str(gameOver))
+                graphic.showTableClient(SetMap.l_map)
+                print(user + " : " + str(nbPoints) + " points !")
+                print("Total shots : " + str(gameOver))
+        self.conn.close()

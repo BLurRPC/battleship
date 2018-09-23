@@ -1,5 +1,4 @@
 from ClientThread import ClientThread
-from GameThread import GameThread
 from Authentification import *
 from queue import Queue
 import socket, select
@@ -35,7 +34,7 @@ def isPositionValid(conn, player):
 
     print("position x : " + positionx)
     print("position y : " + positiony)
-    return (hitAnswer(int(positionx), int(positiony), conn, player))
+    return (hitAnswer(int(positionx), int(positiony), player))
 
 def checkCoule(x, y, ship):
     if(x+1<=9 and share.l_map[y][x+1] == ship):
@@ -48,27 +47,27 @@ def checkCoule(x, y, ship):
         return False
     return True
 
-def hitAnswer(x , y, conn, player):
+def hitAnswer(x , y, player):
     if share.l_map[y][x]== "**":
         print("Already hit")
-        conn.send("Already hit".encode())
-        return False
+        return (str(x)+","+str(y)+","+"Already hit")
     elif share.l_map[y][x] == "##":
-        print("Ratee")
-        conn.send("F".encode())
+        share.l_map[y][x] = "**"
+        print("Failed")
+        return (str(x)+","+str(y)+","+"F")
     else:
         if(checkCoule(x, y, share.l_map[y][x])):
             print("Coule")
             player.nbPoints+=1
             Personne.endOfTheGame+=1
-            conn.send("C".encode())
+            share.l_map[y][x] = "**"
+            return (str(x)+","+str(y)+","+"C")
         else:
             print("Touche")
             player.nbPoints += 1
             Personne.endOfTheGame += 1
-            conn.send("T".encode())
-    share.l_map[y][x] = "**"
-    return True
+            share.l_map[y][x] = "**"
+            return (str(x)+","+str(y)+","+"T")
 
 def accept_client():
     (conn, (ip, port)) = tcpServer.accept()
@@ -83,13 +82,29 @@ while not work_queue.empty():
         accept_client()
 
 ### Game part###
-while Personne.endOfTheGame != 17:
-    graphic.showTable(share.l_map)
-    for conn, player in share.players:
-        conn.send(str(player.nbPoints).encode())
-        conn.recv(10)
-        while(not isPositionValid(conn, player)):
-            print("Wrong position")
-        print("Points du joueur " + player.username + " : " + str(player.nbPoints))
-        conn.recv(10)
-        conn.send(str(Personne.endOfTheGame).encode())
+if(share.players):
+    while Personne.endOfTheGame != 17:
+        graphic.showTableServer(share.l_map)
+        for conn, player in share.players:
+            conn.send("Your,Turn,Play".encode())
+            conn.recv(10)
+            tmpResult = isPositionValid(conn, player) #check position
+            tmpX, tmpY, answer = tmpResult.split(",")
+            conn.send(tmpResult.encode()) #send it to the client
+            while(answer == "Already hit"): #while position has already been hit, retry
+                tmpResult = isPositionValid(conn, player)
+                tmpX, tmpY, answer = tmpResult.split(",")
+                conn.send(tmpResult.encode())
+            print("Points du joueur " + player.username + " : " + str(player.nbPoints))
+            conn.recv(10)
+            conn.send(str(player.nbPoints).encode())
+            conn.recv(10)
+            conn.send(str(Personne.endOfTheGame).encode())
+            for conn2, player2 in share.players:
+                if(conn != conn2): #send updates to everyone except the current player
+                    conn2.send((tmpX+","+tmpY+","+answer).encode())
+                    conn2.recv(10)
+else:
+    print("There are not any players !")
+
+tcpServer.close()

@@ -33,13 +33,13 @@ def checkShipTable(myShip, x,y):
     global l_map
     global orientation_of_ship
     for i, ship in enumerate(myShip):
-        if (orientation_of_ship == "E" and (x+i > 9 or l_map[y][x+i] != "##")):
+        if (orientation_of_ship == "E" and (x+i > 9 or l_map[y][x+i] != "#")):
             return False
-        elif (orientation_of_ship == "N" and (y+i > 9 or l_map[y+i][x] != "##")):
+        elif (orientation_of_ship == "N" and (y+i > 9 or l_map[y+i][x] != "#")):
             return False
-        elif (orientation_of_ship == "W" and (x-i < 0 or l_map[y][x-i] != "##")):          # SUD
+        elif (orientation_of_ship == "W" and (x-i < 0 or l_map[y][x-i] != "#")):          # SUD
             return False
-        elif (orientation_of_ship == "S" and (y-i < 0 or l_map[y-i][x] != "##")):
+        elif (orientation_of_ship == "S" and (y-i < 0 or l_map[y-i][x] != "#")):
             return False
     return True
 

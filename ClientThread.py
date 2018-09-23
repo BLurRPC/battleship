@@ -1,6 +1,5 @@
 from threading import Thread
 from Authentification import *
-from GameThread import GameThread
 import SetMapServer
 import share as share
 
