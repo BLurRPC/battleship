@@ -102,8 +102,17 @@ if(share.players):
             conn.send(str(Personne.endOfTheGame).encode())
             for conn2, player2 in share.players:
                 if(conn != conn2): #send updates to everyone except the current player
-                    conn2.send((tmpX+","+tmpY+","+answer).encode())
-                    conn2.recv(10)
+                    if (int(Personne.endOfTheGame == 17)):
+                        tmpX = "End"
+                        tmpY = "Of"
+                        answer= "Game"
+                        conn2.send((tmpX + "," + tmpY + "," + answer).encode())
+                        conn2.recv(10)
+                    else:
+                        conn2.send((tmpX + "," + tmpY + "," + answer).encode())
+                        conn2.recv(10)
+            if(int(Personne.endOfTheGame==17)):
+                break
 else:
     print("There are not any players !")
 
