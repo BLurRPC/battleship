@@ -96,37 +96,52 @@ class ClientThreadClient(Thread):
 
         ###Gaming part###
         gameOver = 0
-        while gameOver<17: #While not at least 17 hits
+        done = False
+        while done==False: #While not at least 17 hits
             if(not isAdmin): #Only players can play
                 print("Waiting for others to play ...\n")
                 update = self.conn.recv(30)
                 tmpX, tmpY, signal = update.decode().split(",")
                 self.conn.send("ok".encode())
-                while((tmpX!="Your" and tmpY!="Turn" and signal!="Play")):
-                    if(tmpX=="End" and tmpY=="Of" and signal=="Game"):
-                        gameOver=3
-                        tmpX = "Your"
-                        tmpY = "Turn"
-                        signal = "Play"
-                        print("break")
-                    else:
-                        SetMap.l_map[int(tmpY)][int(tmpX)] = signal
+                if((tmpX=="End" and tmpY=="Of" and signal=="Game")):
+                    print("Game is Over")
+                    done = True
+                else:
+                    while((tmpX!="Your" and tmpY!="Turn" and signal!="Play")):
+                        if ((tmpX == "End" and tmpY == "Of" and signal == "Game")):
+                            print("Game is Over")
+                            done = True
+                            break
+                        else:
+                            SetMap.l_map[int(tmpY)][int(tmpX)] = signal
+                            graphic.showTableClient(SetMap.l_map)
+                            print("Waiting for others to play ...\n")
+                            update = self.conn.recv(30)
+                            tmpX, tmpY, signal = update.decode().split(",")
+                            self.conn.send("ok".encode())
+                    if(done==False):
                         graphic.showTableClient(SetMap.l_map)
-                        print("Waiting for others to play ...\n")
-                        update = self.conn.recv(30)
-                        tmpX, tmpY, signal = update.decode().split(",")
+                        while(not self.isPositionValid(user)):
+                            print("")
                         self.conn.send("ok".encode())
-                if(gameOver==17):
+                        temp = self.conn.recv(30).decode()  # Number of points
+                        nbPoints = int(temp)
+                        self.conn.send("ok".encode())
+                        gameOver = int(self.conn.recv(30).decode())
+                        graphic.showTableClient(SetMap.l_map)
+                        print(user + " : " + str(nbPoints) + " points !")
+                        print("Total shots : " + str(gameOver))
+            else: #if Admin
+                update = self.conn.recv(30)
+                tmpX, tmpY, signal = update.decode().split(",")
+                self.conn.send("ok".encode())
+                if ((tmpX == "End" and tmpY == "Of" and signal == "Game")):
+                    print("Game is Over")
+                    done = True
                     break
-                graphic.showTableClient(SetMap.l_map)
-                while(not self.isPositionValid(user)):
-                    print("")
-                self.conn.send("ok".encode())
-                temp = self.conn.recv(30).decode()  # Number of points
-                nbPoints = int(temp)
-                self.conn.send("ok".encode())
-                gameOver = int(self.conn.recv(30).decode())
-                graphic.showTableClient(SetMap.l_map)
-                print(user + " : " + str(nbPoints) + " points !")
-                print("Total shots : " + str(gameOver))
+                else:
+                    SetMap.l_map[int(tmpY)][int(tmpX)] = signal
+                    graphic.showTableClient(SetMap.l_map)
+                    print("Waiting for others to play ...\n")
+
         self.conn.close()

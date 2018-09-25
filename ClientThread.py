@@ -15,19 +15,20 @@ class ClientThread(Thread):
         print("[+] New server socket thread started for " + ip + ":" + str(port))
 
     def run(self):
-
+        count=0
         if self.queue:
             self.queue.put(1)
 
         currentStatus = "waitingForAdmin"
         self.conn.send(currentStatus.encode())
-        while (not share.isAdminConnected):  # While admin not connected
+        while (not share.isAdminConnected or count==0):  # While admin not connected
             user = self.conn.recv(30)
             print(user.decode())
             self.conn.send("ok".encode())
             password = self.conn.recv(30)
             print(password.decode())
             person = Personne(user.decode(), password.decode())
+            count+=1
             if ((user.decode() == person.Admin_username and password.decode() == person.Admin_password)):
                 share.isAdminConnected = True
                 person.isAdmin = True

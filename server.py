@@ -20,6 +20,7 @@ tcpServer.bind((TCP_IP, TCP_PORT))
 tcpServer.listen(5)
 
 share.initTable()
+conns=[]
 rlist = [tcpServer]
 work_queue = Queue()
 
@@ -37,15 +38,17 @@ def isPositionValid(conn, player):
     return (hitAnswer(int(positionx), int(positiony), player))
 
 def checkCoule(x, y, ship):
-    if(x+1<=9 and share.l_map[y][x+1] == ship):
+    compteur = 0
+    print("My ship : " + ship)
+    for i in range(10):
+        for j in range(10):
+            if(share.l_map[j][i]==ship and (x!=i or y!=j)):
+                compteur +=1
+    print("Compteur : " + str(compteur))
+    if(compteur==0):
+        return True
+    else:
         return False
-    if (x - 1 >= 0 and share.l_map[y][x - 1] == ship):
-        return False
-    if (y + 1 <= 9 and share.l_map[y + 1][x] == ship):
-        return False
-    if (y - 1 >= 0 and share.l_map[y - 1][x] == ship):
-        return False
-    return True
 
 def hitAnswer(x , y, player):
     if share.l_map[y][x]== "**":
@@ -72,6 +75,7 @@ def hitAnswer(x , y, player):
 def accept_client():
     (conn, (ip, port)) = tcpServer.accept()
     ClientThread(ip, port, conn, work_queue).start()
+    conns.append(conn)
 
 accept_client()
 
@@ -82,37 +86,35 @@ while not work_queue.empty():
         accept_client()
 
 ### Game part###
+gameOver = False
 if(share.players):
-    while Personne.endOfTheGame != 17:
-        graphic.showTableServer(share.l_map)
-        for conn, player in share.players:
-            conn.send("Your,Turn,Play".encode())
-            conn.recv(10)
-            tmpResult = isPositionValid(conn, player) #check position
-            tmpX, tmpY, answer = tmpResult.split(",")
-            conn.send(tmpResult.encode()) #send it to the client
-            while(answer == "Already hit"): #while position has already been hit, retry
-                tmpResult = isPositionValid(conn, player)
+    while gameOver == False:
+        if (int(Personne.endOfTheGame == 17)):
+            for conn in conns:
+                conn.send("End,Of,Game".encode())
+                conn.recv(10)
+            gameOver = True
+        else:
+            graphic.showTableServer(share.l_map)
+            for conn, player in share.players:
+                conn.send("Your,Turn,Play".encode())
+                conn.recv(10)
+                tmpResult = isPositionValid(conn, player) #check position
                 tmpX, tmpY, answer = tmpResult.split(",")
-                conn.send(tmpResult.encode())
-            print("Points du joueur " + player.username + " : " + str(player.nbPoints))
-            conn.recv(10)
-            conn.send(str(player.nbPoints).encode())
-            conn.recv(10)
-            conn.send(str(Personne.endOfTheGame).encode())
-            for conn2, player2 in share.players:
-                if(conn != conn2): #send updates to everyone except the current player
-                    if (int(Personne.endOfTheGame == 17)):
-                        tmpX = "End"
-                        tmpY = "Of"
-                        answer= "Game"
+                conn.send(tmpResult.encode()) #send it to the client
+                while(answer == "Already hit"): #while position has already been hit, retry
+                    tmpResult = isPositionValid(conn, player)
+                    tmpX, tmpY, answer = tmpResult.split(",")
+                    conn.send(tmpResult.encode())
+                print("Points du joueur " + player.username + " : " + str(player.nbPoints))
+                conn.recv(10)
+                conn.send(str(player.nbPoints).encode())
+                conn.recv(10)
+                conn.send(str(Personne.endOfTheGame).encode())
+                for conn2 in conns:
+                    if(conn != conn2): #send updates to everyone except the current player
                         conn2.send((tmpX + "," + tmpY + "," + answer).encode())
                         conn2.recv(10)
-                    else:
-                        conn2.send((tmpX + "," + tmpY + "," + answer).encode())
-                        conn2.recv(10)
-            if(int(Personne.endOfTheGame==17)):
-                break
 else:
     print("There are not any players !")
 
