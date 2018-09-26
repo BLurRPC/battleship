@@ -75,13 +75,13 @@ def place_ship():
             print("Failure : Wrong format (x,y)")
             coordinates = input("Enter coordinates (x,y)\n")
 
-    print ("Enter your orientation, like S,N,W,E:")
+    print ("Please enter an orientation (S or N or W or E) :")
     orientation_of_ship = input("Orientation: ")
     orientation_boolean = True
     while orientation_boolean:
         if((orientation_of_ship == "E") or (orientation_of_ship == "W") or (orientation_of_ship == "S") or (orientation_of_ship == "N")):
             orientation_boolean = False
         else:
-            print ("Tu t'es foutu de ma gueule ou tu sais pas lire")
+            print ("Unknown orientation, please type 'S' or 'N' or 'W' or 'E' :")
             orientation_of_ship = input("Orientation: ")
     print(orientation_of_ship)

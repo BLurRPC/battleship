@@ -130,7 +130,7 @@ class ClientThreadClient(Thread):
                         gameOver = int(self.conn.recv(30).decode())
                         graphic.showTableClient(SetMap.l_map)
                         print(user + " : " + str(nbPoints) + " points !")
-                        print("Total shots : " + str(gameOver))
+                        print("Total points : " + str(gameOver) + " points !")
             else: #if Admin
                 update = self.conn.recv(30)
                 tmpX, tmpY, signal = update.decode().split(",")
@@ -144,4 +144,6 @@ class ClientThreadClient(Thread):
                     graphic.showTableClient(SetMap.l_map)
                     print("Waiting for others to play ...\n")
 
+        if(not isAdmin):
+            print(self.conn.recv(80).decode()) #print who is the winner of the game
         self.conn.close()

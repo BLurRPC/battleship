@@ -5,24 +5,12 @@ import socket, select
 import share as share
 import graphic
 
-# Multithreaded Python server : TCP Server Socket Program Stub
-TCP_IP = ''
-TCP_PORT = 2004
-
-share.players = []
-share.isAdminConnected=False
-share.isGameReady=False
-share.l_map = [["##" for x in range(10)] for y in range(10)]  # Cette liste contiendra la map en 2D
-
-tcpServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-tcpServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-tcpServer.bind((TCP_IP, TCP_PORT))
-tcpServer.listen(5)
-
-share.initTable()
-conns=[]
-rlist = [tcpServer]
-work_queue = Queue()
+def whoWon():
+    tmpConn, tmpWinner = share.players[0]
+    for conn, player in share.players:
+        if(player.nbPoints>tmpWinner.nbPoints):
+            tmpWinner = player
+    return tmpWinner
 
 def isPositionValid(conn, player):
     data = conn.recv(30)  # receive message from client
@@ -77,6 +65,25 @@ def accept_client():
     ClientThread(ip, port, conn, work_queue).start()
     conns.append(conn)
 
+# Multithreaded Python server : TCP Server Socket Program Stub
+TCP_IP = ''
+TCP_PORT = 2004
+
+share.players = []
+share.isAdminConnected=False
+share.isGameReady=False
+share.l_map = [["##" for x in range(10)] for y in range(10)]  # Cette liste contiendra la map en 2D
+
+tcpServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+tcpServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+tcpServer.bind((TCP_IP, TCP_PORT))
+tcpServer.listen(5)
+
+share.initTable()
+conns=[]
+rlist = [tcpServer]
+work_queue = Queue()
+
 accept_client()
 
 while not work_queue.empty():
@@ -118,4 +125,8 @@ if(share.players):
 else:
     print("There are not any players !")
 
+if(share.players):
+    winner = whoWon()
+    for conn, player in share.players:
+        conn.send(("The winner is " + winner.username + " with " + str(winner.nbPoints) + " points !").encode())
 tcpServer.close()
