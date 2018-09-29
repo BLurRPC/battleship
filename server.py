@@ -4,6 +4,7 @@ from queue import Queue
 import socket, select
 import share as share
 import graphic
+import argparse
 
 def whoWon():
     tmpConn, tmpWinner = share.players[0]
@@ -65,15 +66,22 @@ def accept_client():
     ClientThread(ip, port, conn, work_queue).start()
     conns.append(conn)
 
-# Multithreaded Python server : TCP Server Socket Program Stub
-TCP_IP = ''
-TCP_PORT = 2004
-
 share.players = []
 share.isAdminConnected=False
 share.isGameReady=False
 share.l_map = [["##" for x in range(10)] for y in range(10)]  # Cette liste contiendra la map en 2D
 
+# Multithreaded Python server : TCP Server Socket Program Stub
+TCP_IP = ''
+TCP_PORT = 2004
+
+#Get IP and port
+parser = argparse.ArgumentParser(description='Port.')
+parser.add_argument('-p', default= TCP_PORT, type=int, help='The server\'s port')
+args = parser.parse_args()
+#Save IP and port
+TCP_PORT = args.p
+#Connect to server
 tcpServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 tcpServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 tcpServer.bind((TCP_IP, TCP_PORT))
