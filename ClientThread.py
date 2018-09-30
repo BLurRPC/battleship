@@ -29,7 +29,7 @@ class ClientThread(Thread):
             print(password.decode())
             person = Personne(user.decode(), password.decode())
             count+=1
-            if ((user.decode() == person.Admin_username and password.decode() == person.Admin_password)):
+            if ((user.decode() == person.Admin_username and password.decode() == person.Admin_password) and not share.isAdminConnected):
                 share.isAdminConnected = True
                 person.isAdmin = True
 
