@@ -36,7 +36,6 @@ class ClientThread(Thread):
             if(share.isAdminConnected):
                 currentStatus = "adminConnected"
             self.conn.send(currentStatus.encode())
-            self.conn.recv(10)
 
         if(not person.isAdmin): #If not admin, add to list of players
             share.players.append([self.conn, person])
@@ -44,8 +43,8 @@ class ClientThread(Thread):
         
         if (person.isAdmin):
             adminInfo = "youAreAdmin"
+        self.conn.recv(10)
         self.conn.send(adminInfo.encode())
-
         while not share.isGameReady:
             if (person.isAdmin):
                 for i in range(5):

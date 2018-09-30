@@ -39,8 +39,8 @@ class ClientThreadClient(Thread):
 
     def run(self):
         SetMap.l_map = [["#" for x in range(10)] for y in range(10)]  # Cette liste contiendra la map en 2D
-
-        while (self.conn.recv(30).decode() == "waitingForAdmin"):
+        currentStatus = self.conn.recv(30).decode()
+        while (currentStatus == "waitingForAdmin"):
             user = ""
             password = ""
             while user == "":
@@ -50,12 +50,13 @@ class ClientThreadClient(Thread):
             while password == "":
                 password = getpass.getpass("Please enter a password " + user + " :\n")
             self.conn.send(password.encode())
-            self.conn.send("ok".encode())
+            currentStatus=self.conn.recv(30).decode()
         print("Waiting for others to connect...\n")
         ###Admin part before begining###
-
+        self.conn.send("ok".encode())
         amIAdmin = self.conn.recv(30)
         isAdmin = False
+        
         if(amIAdmin.decode() == "youAreAdmin"):
             isAdmin = True
             ###Admin set the game here cote client
